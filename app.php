@@ -57,6 +57,11 @@ abstract class App
         return chmod($directory, 0755);
     }
 
+
+    public function getDiskSpace()
+    {
+
+    }
 }
 
 class ConvertPicture extends App
@@ -167,8 +172,4 @@ class ConvertPicture extends App
         }
     }
 
-    public function getDiskSpace()
-    {
-
-    }
 }
