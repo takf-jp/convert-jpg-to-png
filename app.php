@@ -6,7 +6,7 @@
  * Time: 15:29
  */
 
-$app = new ModifyPictureApp();
+$app = new ConvertPicture();
 
 $app->execute();
 
@@ -36,31 +36,24 @@ abstract class App
         return trim(fgets(STDIN));
     }
 
+    /**
+     * 画像ファイルの変換
+     *
+     * @param string $file
+     * @param $image
+     * @return bool
+     */
+    abstract public function convertImgFile(string $file, $image): bool;
 
-    protected function convertImgFile(string $file, $image): bool
-    {
-        $filepath = pathinfo($file);
-
-        $permission = $this->setDirectoryToPermission($filepath['dirname']);
-
-        if (!$permission) {
-            return false;
-        }
-
-        $result = imagepng($image, $filepath['dirname'] . '/' . $filepath['filename'] . '.png');
-
-        return $result;
-    }
-
+    /**
+     * 保存先ディレクトリの権限変更
+     *
+     * @param string $directory
+     * @return bool
+     */
     protected function setDirectoryToPermission(string $directory): bool
     {
         return chmod($directory, 0755);
-    }
-
-
-    public function getDiskSpace()
-    {
-
     }
 }
 
@@ -76,7 +69,6 @@ class ConvertPicture extends App
 
         $files = $this->getFilesFromDirectory($directory);
 
-        var_dump($files);
         foreach ($files as $file) {
             $this->convertJpg($file);
         }
@@ -172,4 +164,18 @@ class ConvertPicture extends App
         }
     }
 
+    public function convertImgFile(string $file, $image): bool
+    {
+        $filepath = pathinfo($file);
+
+        $permission = $this->setDirectoryToPermission($filepath['dirname']);
+
+        if (!$permission) {
+            return false;
+        }
+
+        $result = imagepng($image, $filepath['dirname'] . '/' . $filepath['filename'] . '.png');
+
+        return $result;
+    }
 }
