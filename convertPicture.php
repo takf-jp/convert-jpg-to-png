@@ -6,12 +6,23 @@
  * Time: 15:29
  */
 
-$app = new ConvertPicture();
+$app = new ConvertPicturePng("PNG");
 
 $app->execute();
 
-abstract class App
+$app = new ConvertPictureGif("GIF");
+
+$app->execute();
+
+abstract class ConvertPicture
 {
+    protected $fileType;
+
+    function __construct($type)
+    {
+        $this->fileType = $type;
+    }
+
     abstract public function execute();
 
     /**
@@ -43,7 +54,7 @@ abstract class App
      * @param $image
      * @return bool
      */
-    abstract public function convertImgFile(string $file, $image): bool;
+    abstract protected function convertImgFile(string $file, $image): bool;
 
     /**
      * 保存先ディレクトリの権限変更
@@ -55,24 +66,6 @@ abstract class App
     {
         return chmod($directory, 0755);
     }
-}
-
-class ConvertPicture extends App
-{
-    public function execute(): void
-    {
-        $directory = $this->listenDirectory();
-
-        if (!$directory) {
-            $this->showMessage('ディレクトリが正しくありません。');
-        }
-
-        $files = $this->getFilesFromDirectory($directory);
-
-        foreach ($files as $file) {
-            $this->convertJpg($file);
-        }
-    }
 
     /**
      * ディレクトリ名の判定
@@ -80,7 +73,7 @@ class ConvertPicture extends App
      * @param void
      * @return string
      */
-    public function listenDirectory(): string
+    protected function listenDirectory(): string
     {
         $dir = $this->inputDirectoryName('ディレクトリの名前を相対パスで入力してください');
 
@@ -97,7 +90,7 @@ class ConvertPicture extends App
      * @param string
      * @return array
      */
-    public function getFilesFromDirectory($directory): array
+    protected function getFilesFromDirectory($directory): array
     {
         $files = [];
 
@@ -123,7 +116,7 @@ class ConvertPicture extends App
      * @param string
      * @return bool
      */
-    public function determineJpg($file): bool
+    protected function determineJpg($file): bool
     {
         //ファイル形式がJPGか判断
         if (file_exists($file) && exif_imagetype($file) === 2) {
@@ -139,7 +132,7 @@ class ConvertPicture extends App
      * @param string
      * @return
      */
-    public function convertJpg($file): void
+    protected function convertJpg($file): void
     {
         $filename = (basename($file));
 
@@ -150,7 +143,7 @@ class ConvertPicture extends App
             return;
         }
 
-        echo "{$filename}をPNGに変換しています。" . PHP_EOL;
+        echo "{$filename}を{$this->fileType}に変換しています。" . PHP_EOL;
 
         $result = $this->convertImgFile($file, $image);
 
@@ -164,17 +157,72 @@ class ConvertPicture extends App
         }
     }
 
-    public function convertImgFile(string $file, $image): bool
+    
+}
+
+class ConvertPicturePng extends ConvertPicture
+{
+    public function execute(): void
+    {
+        $directory = $this->listenDirectory();
+
+        if (!$directory) {
+            $this->showMessage('ディレクトリが正しくありません。');
+        }
+
+        $files = $this->getFilesFromDirectory($directory);
+
+        foreach ($files as $file) {
+            $this->convertJpg($file, $this->fileType);
+        }
+    }
+
+    protected function convertImgFile(string $file, $image): bool
     {
         $filepath = pathinfo($file);
 
         $permission = $this->setDirectoryToPermission($filepath['dirname']);
 
         if (!$permission) {
+            echo $filepath['dirname']." ディレクトリの権限変更に失敗しました。".PHP_EOL;
             return false;
         }
 
         $result = imagepng($image, $filepath['dirname'] . '/' . $filepath['filename'] . '.png');
+
+        return $result;
+    }
+}
+
+class ConvertPictureGif extends ConvertPicture
+{
+    public function execute(): void
+    {
+        $directory = $this->listenDirectory();
+
+        if (!$directory) {
+            $this->showMessage('ディレクトリが正しくありません。');
+        }
+
+        $files = $this->getFilesFromDirectory($directory);
+
+        foreach ($files as $file) {
+            $this->convertJpg($file);
+        }
+    }
+
+    protected function convertImgFile(string $file, $image): bool
+    {
+        $filepath = pathinfo($file);
+
+        $permission = $this->setDirectoryToPermission($filepath['dirname']);
+
+        if (!$permission) {
+            echo $filepath['dirname']." ディレクトリの権限変更に失敗しました。".PHP_EOL;
+            return false;
+        }
+
+        $result = imagegif($image, $filepath['dirname'] . '/' . $filepath['filename'] . '.gif');
 
         return $result;
     }
