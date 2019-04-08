@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: takf
- * Date: 2019-03-04
- * Time: 15:29
- */
 
 $app = new ConvertPicturePng("PNG");
 
