@@ -1,10 +1,10 @@
 <?php
 
-$app = new ConvertPicturePng("PNG");
+$app = new ConvertPictureToPng("PNG");
 
 $app->execute();
 
-$app = new ConvertPictureGif("GIF");
+$app = new ConvertPictureToGif("GIF");
 
 $app->execute();
 
@@ -151,10 +151,10 @@ abstract class ConvertPicture
         }
     }
 
-    
+
 }
 
-class ConvertPicturePng extends ConvertPicture
+class ConvertPictureToPng extends ConvertPicture
 {
     public function execute(): void
     {
@@ -188,7 +188,7 @@ class ConvertPicturePng extends ConvertPicture
     }
 }
 
-class ConvertPictureGif extends ConvertPicture
+class ConvertPictureToGif extends ConvertPicture
 {
     public function execute(): void
     {
